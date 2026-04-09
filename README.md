@@ -5,21 +5,6 @@
 
 ---
 
-### **Table of Contents**
-1. [Project Overview](#1-project-overview)
-2. [Architecture Diagram](#2-architecture-diagram)
-3. [Step 1: AWS EC2 Instance Preparation](#3-step-1-aws-ec2-instance-preparation)
-4. [Step 2: Install Dependencies on EC2](#4-step-2-install-dependencies-on-ec2)
-5. [Step 3: Jenkins Installation and Setup](#5-step-3-jenkins-installation-and-setup)
-6. [Step 4: GitHub Repository Configuration](#6-step-4-github-repository-configuration)
-    * [Dockerfile](#dockerfile)
-    * [docker-compose.yml](#docker-composeyml)
-    * [Jenkinsfile](#jenkinsfile)
-7. [Step 5: Jenkins Pipeline Creation and Execution](#7-step-5-jenkins-pipeline-creation-and-execution)
-8. [Conclusion](#8-conclusion)
-9. [Infrastructure Diagram](#9-infrastructure-diagram)
-10. [Work flow Diagram](#10-work-flow-diagram)
-
 ---
 
 ### **1. Project Overview**
@@ -62,20 +47,20 @@ This document outlines the step-by-step process for deploying a 2-tier web appli
 
 1.  **Launch EC2 Instance:**
     * Navigate to the AWS EC2 console.
-    * Launch a new instance using the **Ubuntu 22.04 LTS** AMI.
+    * Launch a new instance using the **Ubuntu 24.04 LTS** AMI.
     * Select the **t2.micro** instance type for free-tier eligibility.
     * Create and assign a new key pair for SSH access.
 
-<img src="diagrams/01.png">
+<img src="Images/EC2.png">
 
 2.  **Configure Security Group:**
     * Create a security group with the following inbound rules:
-        * **Type:** SSH, **Protocol:** TCP, **Port:** 22, **Source:** Your IP
-        * **Type:** HTTP, **Protocol:** TCP, **Port:** 80, **Source:** Anywhere (0.0.0.0/0)
-        * **Type:** Custom TCP, **Protocol:** TCP, **Port:** 5000 (for Flask), **Source:** Anywhere (0.0.0.0/0)
-        * **Type:** Custom TCP, **Protocol:** TCP, **Port:** 8080 (for Jenkins), **Source:** Anywhere (0.0.0.0/0)
+        * **Type:** SSH, **Protocol:** TCP, **Port:** 22
+        * **Type:** HTTP, **Protocol:** TCP, **Port:** 80
+        * **Type:** Custom TCP, **Protocol:** TCP, **Port:** 5000 (for Flask)
+        * **Type:** Custom TCP, **Protocol:** TCP, **Port:** 8080 (for Jenkins)
 
-<img src="diagrams/02.png">
+<img src="Images/SG.png">
 
 3.  **Connect to EC2 Instance:**
     * Use SSH to connect to the instance's public IP address.
@@ -145,7 +130,7 @@ This document outlines the step-by-step process for deploying a 2-tier web appli
     sudo usermod -aG docker jenkins
     sudo systemctl restart jenkins
     ```
-<img src="diagrams/03.png">
+<img src="Images/Jenkins.png">
 
 ---
 
@@ -243,24 +228,17 @@ This file contains the pipeline-as-code definition for Jenkins.
 ```groovy
 pipeline {
     agent any
+
     stages {
-        stage('Clone Code') {
-            steps {
-                // Replace with your GitHub repository URL
-                git branch: 'main', url: '[https://github.com/your-username/your-repo.git](https://github.com/your-username/your-repo.git)'
-            }
-        }
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t flask-app:latest .'
+                sh 'docker build -t two-tier-flask-app .'
             }
         }
+
         stage('Deploy with Docker Compose') {
             steps {
-                // Stop existing containers if they are running
-                sh 'docker compose down || true'
-                // Start the application, rebuilding the flask image
-                sh 'docker compose up -d --build'
+                sh 'docker compose up -d'
             }
         }
     }
@@ -283,14 +261,13 @@ pipeline {
     * Verify the **Script Path** is `Jenkinsfile`.
     * Save the configuration.
 
-<img src="diagrams/04.png">
+<img src="Images/Jenkins1.png">
 
 3.  **Run the Pipeline:**
     * Click **Build Now** to trigger the pipeline manually for the first time.
     * Monitor the execution through the **Stage View** or **Console Output**.
 
-<img src="diagrams/05.png">
-<img src="diagrams/06.png">
+
 
 4.  **Verify Deployment:**
     * After a successful build, your Flask application will be accessible at `http://<your-ec2-public-ip>:5000`.
@@ -300,11 +277,3 @@ pipeline {
 
 ### **8. Conclusion**
 The CI/CD pipeline is now fully operational. Any `git push` to the `main` branch of the configured GitHub repository will automatically trigger the Jenkins pipeline, which will build the new Docker image and deploy the updated application, ensuring a seamless and automated workflow from development to production.
-
-
-### **9. Infrastructure Diagram**
-<img src="diagrams/Infrastructure.png">
-
-
-### **10. Work flow Diagram**
-<img src="diagrams/project_workflow.png">
