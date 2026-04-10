@@ -1,7 +1,5 @@
 # DevOps Project Report: Automated CI/CD Pipeline for a 2-Tier Flask Application on AWS
 
-**Author:** Prashant Gohel
-**Date:** August 23, 2025
 
 ---
 
@@ -267,12 +265,12 @@ pipeline {
     * Click **Build Now** to trigger the pipeline manually for the first time.
     * Monitor the execution through the **Stage View** or **Console Output**.
 
-
+<img src="Images/pip.png">
 
 4.  **Verify Deployment:**
     * After a successful build, your Flask application will be accessible at `http://<your-ec2-public-ip>:5000`.
     * Confirm the containers are running on the EC2 instance with `docker ps`.
-
+<img src="Images/wp.png">
 ---
 
 ### **8. Conclusion**
